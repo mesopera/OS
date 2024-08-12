@@ -1,6 +1,5 @@
 #include "memory.c"
 
-
 int main() {
     init();
     char buffer[40] = "hello niggas", buffboi[40];
