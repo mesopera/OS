@@ -1,8 +1,0 @@
-modules = ["c-clang14"]
-run = "gcc main.c"
-
-[nix]
-channel = "stable-24_05"
-
-[deployment]
-run = ["sh", "-c", "gcc main.c"]
