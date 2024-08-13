@@ -38,3 +38,12 @@ void init() {
         }
     } 
 }
+
+void flush_memory()
+{
+    for(int i = 0; i < 100; i++) {
+        for(int j = 0; j < 4; j++) {
+            memory[i][j] = '$';
+        }
+    }
+}
