@@ -1,11 +1,10 @@
-#include "cpu.c"
+#include "cpu.c" // Include Cpu
 
 int main() {
-  init();
-  char buffer[40] = "hello niggas", buffboi[40];
-  buffer_To_Memory(buffer);
-  memory_to_buffer(buffboi, 0);
-  checkMemory();
-  printf("%s", buffboi);
-  return 0;
+
+    init(); // Initialise memory
+    Instructions_To_buffer(); // Load instructions in main memory
+    cpu(); // Start functioning of cpu
+    
+   return 0;
 }

@@ -1,60 +1,54 @@
-#include "memory.c"
-#include <string.h>
+#include "mos.c" // Include MOS for master mode
 
-char generaRegister[4];
-char instructionRegister[4];
-int program_counter=0;
-int toggle = 0;
-int systemInterrupt;
+char general_register[4]; // General purpose register
+char instruction_register[4]; // Instruction register 
+static int program_counter; // Program Counter
+bool toggle; // Toggle for true/false
 
-// void mos()
-// {
-//     switch(SI)
-//     {
-//         case 1:
-//         {
-//             Read(int memory_address);
-//             break;
-//         }
-//         case 2:
-//         {
-//             Write(int memory_address);
-//             break;
-//         }
-//         case 3:
-//         {
-//             Halt();
-//             break;
+// Initialise Cpu
+void cpu_init(){
+   program_counter = 0;
+   memset(instruction_register,'-',4);
+   memset(general_register,'-',4);
+   toggle = false;
+}
+//Function to load instruction from memory to instruction register
+void load_instruction()
+{
+    for(int i=0;i<4;i++)
+    {
+        instruction_register[i]=memory[program_counter][i];
+    }
+    program_counter++;
+}
 
-//         }
-//     }
-// }
+// Funtion to decode the instruction in instruction register
+void decode_instruction()
+{   
+    //Handling the intrupt
+    if (strncmp(instruction_register,"GD",2)==0)
+    {
+        SI=1;
+        MOS(instruction_register);
+    }
+    if (strncmp(instruction_register,"PD",2)==0)
+    {
+        SI=2;
+        MOS(instruction_register);
+    }
+    if (strncmp(instruction_register,"H",1)==0)
+    {
+        SI=3;
+       // MOS();
+    }
 
-// void load_instruction()
-// {
-//     for(int i=0;i<4;i++)
-//     {
-//         instruction_register[i]=memory[program_counter][i];
-//     }
-//     program_counter++;
-// }
+}
 
-// void decode_instruction()
-// {
-//     if (strncmp(instruction_register,"GD",2)==0)
-//     {
-//         SI=1;
-//         MOS();
-//     }
-//     if (strncmp(instruction_register,"PD",2)==0)
-//     {
-//         SI=2;
-//         MOS();
-//     }
-//     if (strncmp(instruction_register,"H",1)==0)
-//     {
-//         SI=3;
-//         MOS();
-//     }
+// Cpu starts working here
+void cpu(){
 
-// }
+    while(SI!=3){
+        load_instruction();
+        decode_instruction();
+    }
+}
