@@ -39,7 +39,8 @@ void Data_To_Buffer(int memory_address){
     }
 
     while(strncmp(buffer,"$END",4)!=0){    // Reads 40 bytes of data at a time 
-        fgets(buffer,sizeof(buffer),file);
+       flush_Buffer();
+       fgets(buffer,sizeof(buffer),file);
         if(strncmp(buffer,"$END",4)==0)
         break;
         if(i!=dataLineNo){
