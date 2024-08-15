@@ -1,11 +1,11 @@
 #include "memory.c"
 #include <string.h>
 
-char genera_register[4];
+char generaRegister[4];
+char instructionRegister[4];
 int program_counter=0;
-char instruction_register[4];
-// bool toggle;
-// static int SI=0;
+int toggle = 0;
+int systemInterrupt;
 
 // void mos()
 // {

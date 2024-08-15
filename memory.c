@@ -25,7 +25,7 @@ void memory_to_buffer(char *buffer, int block) {
     blockCounter++;
 }
 
-void checkMemory() {
+void check_Memory() {
     for(int i = 0; i < 100; i++)  {
         printf("%d   %c | %c | %c | %c \n", i, memory[i][0], memory[i][1], memory[i][2], memory[i][3]);
     }
