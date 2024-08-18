@@ -61,7 +61,7 @@ void decode_instruction()
     }
     if (strncmp(instruction_register,"H",1)==0){
         SI=3;
-       // MOS();
+        MOS(instruction_register);
     }
     if(strncmp(instruction_register,"LR",2)==0){
         int block_address = String_to_address(instruction_register);
@@ -74,11 +74,12 @@ void decode_instruction()
     if(strncmp(instruction_register,"CR",2)==0){
         int block_address = String_to_address(instruction_register);
         toggle = compare_register(block_address, general_register);
+       
     }
     if(strncmp(instruction_register,"BT",2)==0){
         int block_address = String_to_address(instruction_register);
         if(toggle){
-            program_counter = block_address;
+            program_counter = block_address - 1;
         }
     }
 
@@ -86,9 +87,20 @@ void decode_instruction()
 
 // Cpu starts working here
 void cpu(){
-    cpu_init();
+
+    memory_init(); // Initialise memory
+    Instructions_To_buffer(); // Load instructions in main memory
+    cpu_init(); // Initialise Cpu
+
+    // Load decode instruction untill Halt
     while(SI!=3){
         load_instruction();
         decode_instruction();
     }
+
+    // If next job exist again call cpu
+    if(Halt()){
+      cpu();
+    }
 }
+

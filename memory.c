@@ -12,8 +12,12 @@ void buffer_To_Memory(char *buffer) {
     int k = 0;
     for(int i = blockCounter * 10; i < (blockCounter * 10) + 10; i++) {
         for(int j = 0; j < 4; j++) {
-            if(buffer[k]=='\n')
-            continue;
+            if(buffer[k] == '\n'||buffer[k] == '\0'){
+                memory[i][j] = ' ';
+                k++;
+                continue;
+            }
+
             memory[i][j] = buffer[k];
             k++;    
         }
@@ -29,8 +33,11 @@ void data_To_Memory(char *buffer,int block_address) {
         int k = 0;
         for(int i = block_address; i < block_address + 10; i++) {
           for(int j = 0; j < 4; j++) {
-            if(buffer[k]=='\n')
-            continue;
+            if(buffer[k] == '\n'||buffer[k] == '\0'){
+                memory[i][j] = ' ';
+                k++;
+                continue;
+            }
             memory[i][j] = buffer[k];
             k++;
         }
@@ -40,8 +47,11 @@ void data_To_Memory(char *buffer,int block_address) {
     int k = 0;
     for(int i = blockCounter * 10; i < (blockCounter * 10) + 10; i++) {
         for(int j = 0; j < 4; j++) {
-            if(buffer[k]=='\n')
-            continue;
+            if(buffer[k] == '\n'||buffer[k] == '\0'){
+                memory[i][j] = ' ';
+                k++;
+                continue;
+            }
             memory[i][j] = buffer[k];
             k++;
         }
@@ -100,7 +110,7 @@ void checkBuffer(){
 }
 
 // To initialise memory
-void init() {
+void memory_init() {
 
     memset(memory,'-',400);
 
