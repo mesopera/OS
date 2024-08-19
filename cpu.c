@@ -41,9 +41,21 @@ bool compare_register(int block_address, char* general_register){
     return true;
 }
 
+// Clears the block before storing data
+void clear_block(int block_address){
+
+    int block = block_address - block_address % 10;
+
+     for(int i = block; i < block + 10; i++) {
+        for(int j = 0; j < 4; j++) {
+           memory[i][j] = ' ';
+        }
+    }
+}
+
 // Function to store data from general purpose register to memory
 void store_register(int block_address){
-
+   //clear_block(block_address);
     store_data(block_address, general_register);
 }
 
@@ -97,7 +109,7 @@ void cpu(){
         load_instruction();
         decode_instruction();
     }
-
+    checkMemory();
     // If next job exist again call cpu
     if(Halt()){
       cpu();

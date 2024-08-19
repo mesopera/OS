@@ -142,6 +142,7 @@ void Buffer_To_OutputFile(int memory_address){
         fputc(buffer[i],file);
     }
     fputc(' ',file);
+    fputc('\n',file);
     fclose(file);
 
 }

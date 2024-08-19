@@ -5,7 +5,7 @@
 
 static int blockCounter = 0; // Keeps the count of current block
 char memory[100][4]; // Main memory
-char buffer[40]; // Buffer memory
+char buffer[42]; // Buffer memory
 
 // Function to load the contents of buffer to main memory
 void buffer_To_Memory(char *buffer) {
@@ -83,6 +83,7 @@ char* get_data(int block_address){
     }
 
     return data;
+    free(data);
 }
 
 // Function to store data from general purpose register to memory
@@ -104,7 +105,7 @@ void checkMemory() {
 // To check Buffer
 void checkBuffer(){
 
-    for(int i = 0 ; i < 40 ; i++){
+    for(int i = 0 ; i < 42 ; i++){
         printf("%c", buffer[i]);
     }
 }
@@ -118,7 +119,7 @@ void memory_init() {
 
 // Flush buffer 
 void flush_Buffer(){
-    memset(buffer,' ',40);
+    memset(buffer,' ',42);
 }
 
 
