@@ -1,16 +1,19 @@
 #include "mos.c" // Include MOS for master mode
 
-char* general_register; // General purpose register
+char general_register[4]; // General purpose register
 char instruction_register[4]; // Instruction register 
 static int program_counter; // Program Counter
 bool toggle; // Toggle for true/false
 
 // Initialise Cpu
 void cpu_init(){
+   SI = 0;
    program_counter = 0;
    memset(instruction_register,'-',4);
+   memset(general_register,'-',4);
    toggle = false;
 }
+
 //Function to load instruction from memory to instruction register
 void load_instruction()
 {
@@ -24,8 +27,13 @@ void load_instruction()
 // Function to load data in general purpose register
 void load_register(int block_address){
 
-    general_register = get_data(block_address);
-    
+    char* data = (char*)malloc(4); 
+    data = get_data(block_address);
+
+    for(int i=0;i<4;i++){
+        general_register[i] = data[i];
+    }
+    free(data);
 }
 
 // Compare the data in regiter with data in memory at given location
@@ -41,21 +49,9 @@ bool compare_register(int block_address, char* general_register){
     return true;
 }
 
-// Clears the block before storing data
-void clear_block(int block_address){
-
-    int block = block_address - block_address % 10;
-
-     for(int i = block; i < block + 10; i++) {
-        for(int j = 0; j < 4; j++) {
-           memory[i][j] = ' ';
-        }
-    }
-}
-
 // Function to store data from general purpose register to memory
 void store_register(int block_address){
-   //clear_block(block_address);
+
     store_data(block_address, general_register);
 }
 
@@ -109,7 +105,7 @@ void cpu(){
         load_instruction();
         decode_instruction();
     }
-    checkMemory();
+
     // If next job exist again call cpu
     if(Halt()){
       cpu();

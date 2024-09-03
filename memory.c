@@ -110,16 +110,19 @@ void checkBuffer(){
     }
 }
 
-// To initialise memory
-void memory_init() {
-
-    memset(memory,'-',400);
-
-}
-
 // Flush buffer 
 void flush_Buffer(){
     memset(buffer,' ',42);
 }
+
+// To initialise memory
+void memory_init() {
+    
+    blockCounter = 0;
+    memset(memory,'-',400);
+    flush_Buffer();
+}
+
+
 
 

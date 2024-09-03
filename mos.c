@@ -29,7 +29,7 @@ void Read(char* instruction){
 int Halt(){
     print_nextLine();
     job_no++;
-    sameJob = true;
+    current_line_Counter = current_line_Counter + dataLineNo;
     dataLineNo = 1;
     return check_next_job();
 }

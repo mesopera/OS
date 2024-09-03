@@ -4,7 +4,6 @@ int dataLineNo = 1; // Count for number of data lines readed before
 static int current_line_Counter = 1; // Keeps count of current line in the code
 static int job_no = 1; // Keeps count of current job
 int current_job_info[3]; // Stores the info of current job
-bool sameJob = true; // Flag to check the current job
 
 // Function to extract current job no.
 int jobNo(char* buffer){
@@ -43,7 +42,7 @@ int No_of_instruction_lines(char* buffer){
 void extract_jobinfo(char* buffer){
     current_job_info[0] = jobNo(buffer);
     current_job_info[1] = No_of_units(buffer);
-    current_job_info[3] = No_of_instruction_lines(buffer);
+    current_job_info[2] = No_of_instruction_lines(buffer);
 }
 
 // Function to Load Instructions to main memory
@@ -91,20 +90,17 @@ void Data_To_Buffer(int memory_address){
     FILE *file = fopen("input.txt", "r");
     int i = 1;
     int Linecounter = 1; 
-    if(sameJob){                     // Finds the data line of current job
-        while(Linecounter < current_line_Counter){
+   
+        while(Linecounter < current_line_Counter){   // Finds the data line of current job
             fgets(buffer,sizeof(buffer),file);
             flush_Buffer();
             Linecounter++;
        
          }
-          sameJob = false;
-    }
 
     while(EOF){                             // Gets the line that starts with $DATA
         fgets(buffer,sizeof(buffer),file);
         if(strncmp(buffer,"$DATA",5)==0 && current_job_info[0] == job_no){
-            current_line_Counter++;
             break;  
         }
        
@@ -122,8 +118,7 @@ void Data_To_Buffer(int memory_address){
         
     }
     
-     dataLineNo++;                       // Data line counter increments
-
+    dataLineNo++;                   // Data line counter increments
     fclose(file);
   
 }
@@ -136,9 +131,13 @@ void Buffer_To_OutputFile(int memory_address){
     
     memory_to_buffer(buffer,block_address);                         // Loads the data from memory to buffer
 
-    for(int i = 0 ;; i++){ 
-        if(buffer[i]==' ' && buffer[i+1] == ' ')
-        break;                          // Printing the data in output file
+    for(int i = 0 ;i<40; i++){                      
+
+        if(buffer[i]=='-'){                                          // Printing the data in output file
+            fputc(' ',file);
+            continue;
+        }
+
         fputc(buffer[i],file);
     }
     fputc(' ',file);
