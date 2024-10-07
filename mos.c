@@ -26,6 +26,13 @@ void Read(char* instruction){
     Buffer_To_OutputFile(address);
  }
 
+int Halt(){
+    print_nextLine();
+    job_no++;
+    current_line_Counter = current_line_Counter + dataLineNo;
+    dataLineNo = 1;
+    return check_next_job();
+}
 
 // Switching to master mode
 void MOS(char* instruction){
@@ -41,12 +48,6 @@ void MOS(char* instruction){
             Write(instruction);
             break;
         }
-        case 3:
-        {
-            //Halt();
-            printf("%d\n",SI);
-            break;
-
-        }
+       
     }
 }
