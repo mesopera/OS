@@ -27,7 +27,7 @@ void load_instruction(){
     for(int i=0;i<4;i++){
 
         int RealAddress = calRealAddress(program_counter) + program_counter%10;
-        instruction_register[i]=memory[RealAddress][i];
+        instruction_register[i] = memory[RealAddress][i];
 
     }
     program_counter++;
@@ -80,12 +80,7 @@ void store_register(int virtual_address){
 // Funtion to decode the instruction in instruction register
 void decode_instruction(){   
     //Handling the intrupt
-    for(int i = 0;i<4;i++){
-        printf("%c",instruction_register[i]);
-    }
-    printf("\n");
     if (strncmp(instruction_register,"GD",2)==0){
-        printf("GD\n");
         SI=1;
         TTC+=2;
         if(TTC>PCB[1]){
@@ -123,9 +118,13 @@ void decode_instruction(){
             MOS(instruction_register);
         }
         else{
-
-            int block_address = String_to_address(instruction_register);
-            load_register(block_address); 
+            int virtual_address = String_to_address(instruction_register);
+            if(isValidAddress(virtual_address))
+            load_register(virtual_address); 
+            else{
+                PI = 2;
+                MOS(instruction_register);
+            }
         }
         
     }
@@ -136,9 +135,13 @@ void decode_instruction(){
             MOS(instruction_register);
         }
         else{
-
             int virtual_address = String_to_address(instruction_register);
+            if(isValidAddress(virtual_address))
             store_register(virtual_address);
+            else{
+                PI = 2;
+                MOS(instruction_register);
+            }
         }
     }
     else if(strncmp(instruction_register,"CR",2)==0){
@@ -148,9 +151,13 @@ void decode_instruction(){
             MOS(instruction_register);
         }
         else{
-
             int virtual_address = String_to_address(instruction_register);
+            if(isValidAddress(virtual_address))
             toggle = compare_register(virtual_address, general_register);
+            else{
+                PI = 2;
+                MOS(instruction_register);
+            }
         }
     }
     else if(strncmp(instruction_register,"BT",2)==0){
@@ -160,10 +167,15 @@ void decode_instruction(){
             MOS(instruction_register);
         }
         else{
-
             int virtual_address = String_to_address(instruction_register);
-            if(toggle){
-                program_counter = virtual_address - 1;
+            if(isValidAddress(virtual_address)){
+                if(toggle){
+                    program_counter = virtual_address - 1;
+                }
+            }
+            else{
+                PI = 2;
+                MOS(instruction_register);
             }
         }
     }
@@ -193,7 +205,7 @@ void cpu(){
     if(nextJob){
       cpu();
     }
-   // checkMemory();
+    //checkMemory();
 
 }
 

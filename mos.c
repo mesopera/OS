@@ -8,21 +8,25 @@ int LLC = 0;
 int nextJob = 0;
 int H = 0;
 
-void MOS(char* instruction);
+int Halt(){
+    print_nextLine();
+    job_no++;
+    dataLineNo = 1;
+    return check_next_job();
+}
 
 // Function to read data from input file
 int Read(char* instruction){
 
     int address = String_to_address(instruction);
-
-    printf("%d\n",address);
+   
     if(isValidAddress(address)){
 
         return Data_To_Buffer(address);
     }
     else{
         PI = 2;
-        MOS(instruction);
+        return 1;
     }
 }
 
@@ -35,53 +39,10 @@ int Read(char* instruction){
         Buffer_To_OutputFile(block_address);
     }
     else{
-        PI = 2;
-        MOS(instruction);
+        PI = 2; 
     }
     
  }
-
-// Function to handle errors
-void terminate(int error){
-
-    FILE* file = fopen("output.txt","a");
-    if(error == 0){
-        fprintf(file,"\nProgram executed successfully with exit code :%d\n", error);
-    }
-    else if(error == 1){
-        fprintf(file,"Out of data");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
-    }
-    else if(error == 2){
-        fprintf(file,"Line Limit Exceeded");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
-    }
-    else if(error == 3){
-        fprintf(file,"Time limit Exceeded");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
-    }
-    else if(error == 4){
-        fprintf(file,"Operation Code Error");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
-    }
-    else if(error == 5){
-        fprintf(file,"Operand Error");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
-    }
-    else if(error == 6){
-        fprintf(file,"Invalid Page Fault");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
-    }
-
-    fclose(file);
-}
-
-int Halt(){
-    print_nextLine();
-    job_no++;
-    dataLineNo = 1;
-    return check_next_job();
-}
 
 // Switching to master mode
 void MOS(char* instruction){

@@ -105,10 +105,12 @@ int String_to_address(char* instruction){
     else{
         s[1] = '\0';
     }
-    if(s[0] == '0' || s[1] == '0')
-    return atoi(s);
-    else
+
+    int si = atoi(s);
+    if(s[0] != '0' && si == 0)
     return -1;
+    else
+    return si;
 }
 
 bool checkPTREntry(int virtualAddress){
