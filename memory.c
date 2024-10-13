@@ -8,8 +8,9 @@ static int blockCounter = 0; // Keeps the count of current block
 char memory[300][4]; // Main memory
 char buffer[42]; // Buffer memory
 int PTR; // Page Table Register
-int BlockManager[30] = {0};
+int BlockManager[30] = {0}; // Keeps track of occupied blocks
 
+// Function to generate random block between [0,30]
 int randomAddressGenerator(){
     srand(time(0));
     int blockAddress = rand()%30;
@@ -19,12 +20,13 @@ int randomAddressGenerator(){
         blockAddress = rand()%30;
     }
     BlockManager[blockAddress] = 1;
+   
     return blockAddress;
 }
 
 // Function to load the contents of buffer to main memory
 void Instructions_To_Memory(char *buffer) {
-
+    
     int blockAddress = randomAddressGenerator();
     int ptrAddress = PTR*10 + blockCounter;
     char address[4];
@@ -39,14 +41,14 @@ void Instructions_To_Memory(char *buffer) {
             if(buffer[k] == '\n'||buffer[k] == '\0'){
                 memory[i][j] = ' ';
                 k++;
-                continue;
+                continue;   
             }
-
             memory[i][j] = buffer[k];
             k++;    
         }
-    }
 
+    }
+    
     blockCounter++;
 }
 
@@ -89,10 +91,6 @@ void memory_to_buffer(char *buffer, int block) {
     }
 }
 
-bool isValidAddress(int address){
-    return 0<= address && address <= 99;
-}
-
 // Function to extract memory address from instruction
 int String_to_address(char* instruction){
 
@@ -113,6 +111,23 @@ int String_to_address(char* instruction){
     return si;
 }
 
+// Function to create a page table
+int create_PageTable(){
+
+    srand(time(0));
+    int ptr = rand()%30;
+
+    for(int i = ptr*10; i < ptr*10 + 10; i++){
+        memory[i][0] = '#';
+        memory[i][1] = '#';
+        memory[i][2] = '#';
+        memory[i][3] = '#';
+    }
+
+    return ptr;
+}
+
+// Checks if there is entry for given virtual address in page table
 bool checkPTREntry(int virtualAddress){
     int PTR_Entry = PTR*10 + virtualAddress/10;
     for(int i = 0; i < 4; i++){
@@ -125,6 +140,7 @@ bool checkPTREntry(int virtualAddress){
     return false;
 }
 
+// Converts virtual address to real address
 int calRealAddress(int virtualAddress){
     int PTR_Entry = PTR*10 + virtualAddress/10;
     if(checkPTREntry(virtualAddress)){
@@ -155,6 +171,18 @@ void store_data(int virtual_address, char* general_register){
 
 }
 
+// Function to check valid address
+bool isValidAddress(int address){
+    return 0<= address && address <= 99;
+}
+
+// Checks for the page fault
+bool checkPageFault(int virtual_address){
+
+    return checkPTREntry(virtual_address);
+
+}
+
 //Function to check memory
 void checkMemory() {
     for(int i = 0; i < 300; i++)  {
@@ -180,20 +208,6 @@ void memory_init() {
     
     blockCounter = 0;
     memset(memory,'-',1200);
+    memset(BlockManager,0,30);
     flush_Buffer();
-}
-
-int create_PageTable(){
-
-    srand(time(0));
-    int ptr = rand()%30;
-
-    for(int i = ptr*10; i < ptr*10 + 10; i++){
-        memory[i][0] = '#';
-        memory[i][1] = '#';
-        memory[i][2] = '#';
-        memory[i][3] = '#';
-    }
-
-    return ptr;
 }

@@ -1,7 +1,7 @@
 #include "memory.c" // include memory for memory related operation
 
 int dataLineNo = 1; // Count for number of data lines readed before
-static int current_line_Counter = 1; // Keeps count of current line in the code
+static int current_line_Counter = 0; // Keeps count of current line in the code
 static int job_no = 1; // Keeps count of current job
 int PCB[3]; // Stores the info of current job
 
@@ -49,7 +49,14 @@ void extract_jobinfo(char* buffer){
 void Instructions_To_buffer(){
 
     FILE *file = fopen("input.txt", "r");
-
+    int Linecounter = 1; 
+   
+    while(Linecounter <= current_line_Counter){           // Finds the line where current job begins
+        fgets(buffer,sizeof(buffer),file);
+        flush_Buffer();
+        Linecounter++;
+       
+    }
     while(EOF){                              // Gets the line that starts with $AMJ
         flush_Buffer();
         fgets(buffer,sizeof(buffer),file);
@@ -64,7 +71,7 @@ void Instructions_To_buffer(){
 
     }
 
-   while(1){                                // Reads the instruction from the next line
+   while(1){                                      // Reads the instruction from the next line
         flush_Buffer();
         fgets(buffer,sizeof(buffer),file);
         if(strncmp(buffer,"$DATA",5)==0)
@@ -83,8 +90,8 @@ int Data_To_Buffer(int memory_address){
     int i = 1;
     int Linecounter = 1; 
    
-    while(Linecounter < current_line_Counter){
-           // Finds the data line of current job
+    while(Linecounter < current_line_Counter){     // Finds the data line of current job
+        
         fgets(buffer,sizeof(buffer),file);
         flush_Buffer();
         Linecounter++;
@@ -169,36 +176,36 @@ int check_next_job(){
     return 0;
 }
 
-// Function to handle errors
-void terminate(int error){
+// Terminate function with appropriate exit code
+void terminate(int exitCode){
 
     FILE* file = fopen("output.txt","a");
-    if(error == 0){
-        fprintf(file,"\nProgram executed successfully with exit code :%d\n", error);
+    if(exitCode == 0){
+        fprintf(file,"\nProgram executed successfully with exit code :%d\n", exitCode);
     }
-    else if(error == 1){
+    else if(exitCode == 1){
         fprintf(file,"Out of data");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
+        fprintf(file,"\nProgram terminated with exit code :%d\n", exitCode);
     }
-    else if(error == 2){
-        fprintf(file,"Line Limit Exceeded");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
+    else if(exitCode == 2){
+        fprintf(file,"\nLine Limit Exceeded");
+        fprintf(file,"\nProgram terminated with exit code :%d\n", exitCode);
     }
-    else if(error == 3){
-        fprintf(file,"Time limit Exceeded");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
+    else if(exitCode == 3){
+        fprintf(file,"\nTime limit Exceeded");
+        fprintf(file,"\nProgram terminated with exit code :%d\n", exitCode);
     }
-    else if(error == 4){
+    else if(exitCode == 4){
         fprintf(file,"Operation Code Error");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
+        fprintf(file,"\nProgram terminated with exit code :%d\n", exitCode);
     }
-    else if(error == 5){
+    else if(exitCode == 5){
         fprintf(file,"Operand Error");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
+        fprintf(file,"\nProgram terminated with exit code :%d\n", exitCode);
     }
-    else if(error == 6){
+    else if(exitCode == 6){
         fprintf(file,"Invalid Page Fault");
-        fprintf(file,"\nProgram terminated with exit code :%d\n", error);
+        fprintf(file,"\nProgram terminated with exit code :%d\n", exitCode);
     }
 
     fclose(file);

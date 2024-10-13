@@ -63,7 +63,7 @@ bool compare_register(int virtual_address, char* general_register){
 // Function to store data from general purpose register to memory
 void store_register(int virtual_address){
 
-    if(!checkPTREntry(virtual_address)){
+    if(!checkPTREntry(virtual_address)){                     // Valid page fault (Allocates space and create page table entry)
             int blockAddress = randomAddressGenerator();
             int ptrAddress = PTR*10 + virtual_address/10;
             char address[4];
@@ -78,7 +78,8 @@ void store_register(int virtual_address){
 }
 
 // Funtion to decode the instruction in instruction register
-void decode_instruction(){   
+void decode_instruction(){
+
     //Handling the intrupt
     if (strncmp(instruction_register,"GD",2)==0){
         SI=1;
@@ -119,10 +120,19 @@ void decode_instruction(){
         }
         else{
             int virtual_address = String_to_address(instruction_register);
-            if(isValidAddress(virtual_address))
-            load_register(virtual_address); 
-            else{
+            if(isValidAddress(virtual_address)){                            // Checks for valid syntax
+                if(checkPageFault(virtual_address)){                        // Checks for Page fault
+                    load_register(virtual_address);
+                }
+                else{
+                    PI = 3;
+                    SI = 0;
+                    MOS(instruction_register);
+                }
+            }
+            else{                                                            // Operand Error
                 PI = 2;
+                SI = 0;
                 MOS(instruction_register);
             }
         }
@@ -136,10 +146,12 @@ void decode_instruction(){
         }
         else{
             int virtual_address = String_to_address(instruction_register);
-            if(isValidAddress(virtual_address))
-            store_register(virtual_address);
-            else{
+            if(isValidAddress(virtual_address)){
+                store_register(virtual_address);
+            }
+            else{                                                               // Operand Error
                 PI = 2;
+                SI = 0;
                 MOS(instruction_register);
             }
         }
@@ -152,10 +164,19 @@ void decode_instruction(){
         }
         else{
             int virtual_address = String_to_address(instruction_register);
-            if(isValidAddress(virtual_address))
-            toggle = compare_register(virtual_address, general_register);
-            else{
+            if(isValidAddress(virtual_address)){
+                if(checkPageFault(virtual_address)){
+                    toggle = compare_register(virtual_address, general_register);
+                }
+                else{
+                    PI = 3;
+                    SI = 0;
+                    MOS(instruction_register);
+                }
+            }
+            else{                                                                     // Operand Error
                 PI = 2;
+                SI = 0;
                 MOS(instruction_register);
             }
         }
@@ -169,18 +190,27 @@ void decode_instruction(){
         else{
             int virtual_address = String_to_address(instruction_register);
             if(isValidAddress(virtual_address)){
-                if(toggle){
-                    program_counter = virtual_address - 1;
+                if(checkPageFault(virtual_address)){
+                    if(toggle){
+                        program_counter = virtual_address - 1;
+                    }
+                }
+                else{
+                    PI = 3;
+                    SI = 0;
+                    MOS(instruction_register);
                 }
             }
-            else{
+            else{                                                               // Operand Error
                 PI = 2;
+                SI = 0;
                 MOS(instruction_register);
             }
         }
     }
-    else {
+    else {                                                                     // Opcode Error
         PI = 1;
+        SI = 0;
         MOS(instruction_register);
     }
 }
@@ -189,23 +219,20 @@ void decode_instruction(){
 void cpu(){
 
     memory_init(); // Initialise memory
-    PTR = create_PageTable();
+    PTR = create_PageTable(); // Creates Page Table 
     Instructions_To_buffer(); // Load instructions in main memory
     cpu_init(); // Initialise Cpu
-    
-    // Load decode instruction untill Halt
+
+    // Load decode instruction until Halt
     while(SI!=3 && H != 1){
         load_instruction();
         decode_instruction();
     }
-
-    printf("Cpu cycles :%d\n",TTC);
-
+    
     // If next job exists again call cpu
     if(nextJob){
       cpu();
     }
-    //checkMemory();
 
 }
 

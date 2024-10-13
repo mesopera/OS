@@ -1,13 +1,18 @@
 #include "FileOperations.c" // Include file operations
 
-int SI = 0; // Interupt counter
-int TI = 0;
+// Interupts
+int SI = 0;
+int TI = 0; 
 int PI = 0;
+// Counters
 int TTC = 0;
 int LLC = 0;
-int nextJob = 0;
-int H = 0;
 
+int nextJob = 0; // Check for next job
+
+int H = 0;       // Condition for halt
+
+// Halt function for a job
 int Halt(){
     print_nextLine();
     job_no++;
@@ -20,8 +25,7 @@ int Read(char* instruction){
 
     int address = String_to_address(instruction);
    
-    if(isValidAddress(address)){
-
+    if(isValidAddress(address)){                        // Checks for valid address
         return Data_To_Buffer(address);
     }
     else{
@@ -34,12 +38,17 @@ int Read(char* instruction){
  void Write(char* instruction){
 
     int vitualAddress = String_to_address(instruction);
-    if(isValidAddress(vitualAddress)){
-        int block_address = calRealAddress(vitualAddress);
-        Buffer_To_OutputFile(block_address);
+    if(isValidAddress(vitualAddress)){                              // Checks for valid address
+        if(checkPageFault(vitualAddress)){                          // Checks for page fault
+            int block_address = calRealAddress(vitualAddress);
+            Buffer_To_OutputFile(block_address);
+        }
+        else{
+            PI = 3;
+        }
     }
     else{
-        PI = 2; 
+        PI = 2;                                                      // Operand Error
     }
     
  }
@@ -85,10 +94,7 @@ void MOS(char* instruction){
             }
             switch (PI)
             {
-                case 0:
-                {
-                    break;
-                } 
+            
                 case 1:
                 {
                     terminate(4);
@@ -105,7 +111,9 @@ void MOS(char* instruction){
                 }
                 case 3:
                 {
-                    //if valid page fault, allocate else terminate(6)
+                    terminate(6);
+                    H = 1;
+                    nextJob = Halt();
                     break;
                 }
             }
