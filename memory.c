@@ -89,6 +89,9 @@ void memory_to_buffer(char *buffer, int block) {
     }
 }
 
+bool isValidAddress(int address){
+    return 0<= address && address <= 99;
+}
 
 // Function to extract memory address from instruction
 int String_to_address(char* instruction){
@@ -102,7 +105,10 @@ int String_to_address(char* instruction){
     else{
         s[1] = '\0';
     }
+    if(s[0] == '0' || s[1] == '0')
     return atoi(s);
+    else
+    return -1;
 }
 
 bool checkPTREntry(int virtualAddress){

@@ -4,7 +4,6 @@ char general_register[4]; // General purpose register
 char instruction_register[4]; // Instruction register 
 int program_counter; // Program Counter
 bool toggle; // Toggle for true/false
-int cpuCycles;
 
 // Initialise Cpu
 void cpu_init(){
@@ -12,8 +11,10 @@ void cpu_init(){
    SI = 0;
    TI = 0;
    PI = 0;
+   H = 0;
    program_counter = 0;
-   cpuCycles = 0;
+   TTC = 0;
+   LLC = 0;
    toggle = false;
    memset(instruction_register,'-',4);
    memset(general_register,'-',4);
@@ -79,58 +80,97 @@ void store_register(int virtual_address){
 // Funtion to decode the instruction in instruction register
 void decode_instruction(){   
     //Handling the intrupt
+    for(int i = 0;i<4;i++){
+        printf("%c",instruction_register[i]);
+    }
+    printf("\n");
     if (strncmp(instruction_register,"GD",2)==0){
+        printf("GD\n");
         SI=1;
-        cpuCycles+=2;
-        // if(cpuCycles>PCB[1]) 
-        // TI = 2;
+        TTC+=2;
+        if(TTC>PCB[1]){
+            TI = 2;
+            MOS(instruction_register);
+        }
+        else
         MOS(instruction_register);
     }
-    if (strncmp(instruction_register,"PD",2)==0){
+    else if (strncmp(instruction_register,"PD",2)==0){
         SI=2;
-        cpuCycles++;
-        // if(cpuCycles>PCB[1]) 
-        // TI = 2;
+        TTC++;
+        LLC++;
+        if(TTC>PCB[1]){
+            TI = 2;
+            MOS(instruction_register);
+        }
+        else
         MOS(instruction_register);
     }
-    if (strncmp(instruction_register,"H",1)==0){
+    else if (strncmp(instruction_register,"H",1)==0){
         SI=3;
-        cpuCycles++;
-        // if(cpuCycles>PCB[1]) 
-        // TI = 2;
+        TTC++;
+        if(TTC>PCB[1]){
+            TI = 2;
+            MOS(instruction_register);
+        }
+        else
         MOS(instruction_register);
     }
-    if(strncmp(instruction_register,"LR",2)==0){
-        cpuCycles++;
-        // if(cpuCycles>PCB[1]) 
-        // TI = 2;
-        int block_address = String_to_address(instruction_register);
-        load_register(block_address); 
+    else if(strncmp(instruction_register,"LR",2)==0){
+        TTC++;
+        if(TTC>PCB[1]){
+            TI = 2;
+            MOS(instruction_register);
+        }
+        else{
+
+            int block_address = String_to_address(instruction_register);
+            load_register(block_address); 
+        }
+        
     }
-    if(strncmp(instruction_register,"SR",2)==0){
-        cpuCycles+=2;
-        // if(cpuCycles>PCB[1]) 
-        // TI = 2;
-        int virtual_address = String_to_address(instruction_register);
-        store_register(virtual_address);
-    }
-    if(strncmp(instruction_register,"CR",2)==0){
-        cpuCycles++;
-        // if(cpuCycles>PCB[1]) 
-        // TI = 2;
-        int virtual_address = String_to_address(instruction_register);
-        toggle = compare_register(virtual_address, general_register);
-    }
-    if(strncmp(instruction_register,"BT",2)==0){
-        cpuCycles++;
-        // if(cpuCycles>PCB[1]) 
-        // TI = 2;
-        int virtual_address = String_to_address(instruction_register);
-        if(toggle){
-            program_counter = virtual_address - 1;
+    else if(strncmp(instruction_register,"SR",2)==0){
+        TTC+=2;
+        if(TTC>PCB[1]){
+            TI = 2;
+            MOS(instruction_register);
+        }
+        else{
+
+            int virtual_address = String_to_address(instruction_register);
+            store_register(virtual_address);
         }
     }
+    else if(strncmp(instruction_register,"CR",2)==0){
+        TTC++;
+        if(TTC>PCB[1]){
+            TI = 2;
+            MOS(instruction_register);
+        }
+        else{
 
+            int virtual_address = String_to_address(instruction_register);
+            toggle = compare_register(virtual_address, general_register);
+        }
+    }
+    else if(strncmp(instruction_register,"BT",2)==0){
+        TTC++;
+        if(TTC>PCB[1]){
+            TI = 2;
+            MOS(instruction_register);
+        }
+        else{
+
+            int virtual_address = String_to_address(instruction_register);
+            if(toggle){
+                program_counter = virtual_address - 1;
+            }
+        }
+    }
+    else {
+        PI = 1;
+        MOS(instruction_register);
+    }
 }
 
 // Cpu starts working here
@@ -142,14 +182,15 @@ void cpu(){
     cpu_init(); // Initialise Cpu
     
     // Load decode instruction untill Halt
-    while(SI!=3){
+    while(SI!=3 && H != 1){
         load_instruction();
         decode_instruction();
     }
 
-    printf("Cpu cycles :%d\n",cpuCycles);
+    printf("Cpu cycles :%d\n",TTC);
+
     // If next job exists again call cpu
-    if(Halt()){
+    if(nextJob){
       cpu();
     }
    // checkMemory();

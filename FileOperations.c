@@ -49,13 +49,9 @@ void extract_jobinfo(char* buffer){
 void Instructions_To_buffer(){
 
     FILE *file = fopen("input.txt", "r");
-
-    int Linecounter = 1;
-
-    while(Linecounter < current_line_Counter){ // Finds the line where the current job begins
-        fgets(buffer,sizeof(buffer),file);
-        flush_Buffer();
-        Linecounter++;
+    if(file == NULL){
+        printf("I error\n");
+        return;
     }
 
     while(EOF){                              // Gets the line that starts with $AMJ
@@ -85,20 +81,26 @@ void Instructions_To_buffer(){
 }
 
 // Function to load data to main memory
-void Data_To_Buffer(int memory_address){
+int Data_To_Buffer(int memory_address){
 
     FILE *file = fopen("input.txt", "r");
+    if(file == NULL){
+        printf("D error\n");
+        return 0;
+    }
     int i = 1;
     int Linecounter = 1; 
    
-        while(Linecounter < current_line_Counter){   // Finds the data line of current job
-            fgets(buffer,sizeof(buffer),file);
-            flush_Buffer();
-            Linecounter++;
+    while(Linecounter < current_line_Counter){
+           // Finds the data line of current job
+        fgets(buffer,sizeof(buffer),file);
+        flush_Buffer();
+        Linecounter++;
        
-         }
+    }
 
     while(EOF){                             // Gets the line that starts with $DATA
+        
         fgets(buffer,sizeof(buffer),file);
         if(strncmp(buffer,"$DATA",5)==0 && PCB[0] == job_no){
             break;  
@@ -107,10 +109,14 @@ void Data_To_Buffer(int memory_address){
     }
 
     while(1){    // Reads 40 bytes of data at a time 
+       
        flush_Buffer();
        fgets(buffer,sizeof(buffer),file);
-       if(strncmp(buffer,"$END",4)==0)
-       break;
+       if(strncmp(buffer,"$END",4)==0){
+            return 0;
+            break;
+       }
+       
         if(i!=dataLineNo){
             i++;
             continue;
@@ -121,13 +127,17 @@ void Data_To_Buffer(int memory_address){
     }
     dataLineNo++;                   // Data line counter increments
     fclose(file);
-  
+    return 1;
 }
 
 // Function to write data into output file
 void Buffer_To_OutputFile(int block_address){
 
     FILE *file = fopen("output.txt", "a");
+    if(file == NULL){
+        printf("W error\n");
+        return;
+    }
     memory_to_buffer(buffer,block_address);                         // Loads the data from memory to buffer
 
     for(int i = 0 ;i<40; i++){                      
@@ -148,29 +158,26 @@ void Buffer_To_OutputFile(int block_address){
 // Function to check if the next block exists
 int check_next_job(){
 
-    
     FILE *file = fopen("input.txt", "r");
+    if(file == NULL){
+        printf("N error\n");
+        return 0;
+    }
     flush_Buffer();
-    int Linecounter = 1;
+     int Linecounter = 1;
 
-     while(Linecounter < current_line_Counter){   // Finds the data line of current job
-        fgets(buffer,sizeof(buffer),file);
-        flush_Buffer();
-        Linecounter++;
-       
-     }
-     
     while(fgets(buffer,sizeof(buffer),file)){
         if(strncmp(buffer,"$AMJ",4)==0){
             extract_jobinfo(buffer);
             if(PCB[0]==job_no){
                 fclose(file);
-                // current_line_Counter = Linecounter - 1;
+                current_line_Counter = Linecounter - 1;
                 return 1;
                 break;
             }
            
         }
+        Linecounter++;
         flush_Buffer();
     }
 
