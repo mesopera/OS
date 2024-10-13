@@ -3,7 +3,7 @@
 int dataLineNo = 1; // Count for number of data lines readed before
 static int current_line_Counter = 1; // Keeps count of current line in the code
 static int job_no = 1; // Keeps count of current job
-int current_job_info[3]; // Stores the info of current job
+int PCB[3]; // Stores the info of current job
 
 // Function to extract current job no.
 int jobNo(char* buffer){
@@ -16,8 +16,8 @@ int jobNo(char* buffer){
     return atoi(job);
 }
 
-// Function to extract unit of time required
-int no_of_timeUnits(char* buffer){
+// Function to extract units of time required
+int no_of_cpuCycles(char* buffer){
     char job[5];
     job[0] = buffer[8];
     job[1] = buffer[9];
@@ -40,9 +40,9 @@ int no_of_linesToPrint(char* buffer){
 
 // Function call to extract job info
 void extract_jobinfo(char* buffer){
-    current_job_info[0] = jobNo(buffer);
-    current_job_info[1] = no_of_timeUnits(buffer);
-    current_job_info[2] = no_of_linesToPrint(buffer);
+    PCB[0] = jobNo(buffer);
+    PCB[1] = no_of_cpuCycles(buffer);
+    PCB[2] = no_of_linesToPrint(buffer);
 }
 
 // Function to Load Instructions to main memory
@@ -63,7 +63,7 @@ void Instructions_To_buffer(){
         fgets(buffer,sizeof(buffer),file);
         if(strncmp(buffer,"$AMJ",4)==0){
             extract_jobinfo(buffer);
-            if(current_job_info[0]==job_no){
+            if(PCB[0]==job_no){
                 current_line_Counter++;
                 break;
             }
@@ -100,15 +100,17 @@ void Data_To_Buffer(int memory_address){
 
     while(EOF){                             // Gets the line that starts with $DATA
         fgets(buffer,sizeof(buffer),file);
-        if(strncmp(buffer,"$DATA",5)==0 && current_job_info[0] == job_no){
+        if(strncmp(buffer,"$DATA",5)==0 && PCB[0] == job_no){
             break;  
         }
        
     }
 
-    while(strncmp(buffer,"$END",4)!=0){    // Reads 40 bytes of data at a time 
+    while(1){    // Reads 40 bytes of data at a time 
        flush_Buffer();
        fgets(buffer,sizeof(buffer),file);
+       if(strncmp(buffer,"$END",4)==0)
+       break;
         if(i!=dataLineNo){
             i++;
             continue;
@@ -117,18 +119,15 @@ void Data_To_Buffer(int memory_address){
         break;
         
     }
-    
     dataLineNo++;                   // Data line counter increments
     fclose(file);
   
 }
 
 // Function to write data into output file
-void Buffer_To_OutputFile(int memory_address){
+void Buffer_To_OutputFile(int block_address){
 
-    FILE *file = fopen("result.txt", "a");
-    int block_address = memory_address - memory_address % 10;       // Nearest 10 block of address
-    
+    FILE *file = fopen("output.txt", "a");
     memory_to_buffer(buffer,block_address);                         // Loads the data from memory to buffer
 
     for(int i = 0 ;i<40; i++){                      
@@ -140,7 +139,6 @@ void Buffer_To_OutputFile(int memory_address){
 
         fputc(buffer[i],file);
     }
-    fputc(' ',file);
     fputc('\n',file);
     fclose(file);
 
@@ -150,26 +148,29 @@ void Buffer_To_OutputFile(int memory_address){
 // Function to check if the next block exists
 int check_next_job(){
 
+    
     FILE *file = fopen("input.txt", "r");
     flush_Buffer();
     int Linecounter = 1;
-    while(Linecounter < current_line_Counter){
+
+     while(Linecounter < current_line_Counter){   // Finds the data line of current job
         fgets(buffer,sizeof(buffer),file);
         flush_Buffer();
         Linecounter++;
-    }
-
+       
+     }
+     
     while(fgets(buffer,sizeof(buffer),file)){
         if(strncmp(buffer,"$AMJ",4)==0){
             extract_jobinfo(buffer);
-            if(current_job_info[0]==job_no){
+            if(PCB[0]==job_no){
                 fclose(file);
+                // current_line_Counter = Linecounter - 1;
                 return 1;
                 break;
             }
            
         }
-        
         flush_Buffer();
     }
 
@@ -180,7 +181,7 @@ int check_next_job(){
 // Function to print 2 next line characters after the job is done
 void print_nextLine(){
     FILE* file;
-    file = fopen("result.txt","a");
+    file = fopen("output.txt","a");
     fputc('\n',file);
     fputc('\n',file);
     fclose(file);

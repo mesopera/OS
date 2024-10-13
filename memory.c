@@ -10,9 +10,7 @@ char buffer[42]; // Buffer memory
 int PTR; // Page Table Register
 int BlockManager[30] = {0};
 
-// Function to load the contents of buffer to main memory
-void Instructions_To_Memory(char *buffer) {
-
+int randomAddressGenerator(){
     srand(time(0));
     int blockAddress = rand()%30;
     while(1){
@@ -20,8 +18,14 @@ void Instructions_To_Memory(char *buffer) {
         break;
         blockAddress = rand()%30;
     }
-
     BlockManager[blockAddress] = 1;
+    return blockAddress;
+}
+
+// Function to load the contents of buffer to main memory
+void Instructions_To_Memory(char *buffer) {
+
+    int blockAddress = randomAddressGenerator();
     int ptrAddress = PTR*10 + blockCounter;
     char address[4];
     itoa(blockAddress,address,10);
@@ -47,25 +51,18 @@ void Instructions_To_Memory(char *buffer) {
 }
 
 // Function to load data to main memory
-void data_To_Memory(char *buffer,int block_address) {
+void data_To_Memory(char *buffer,int virtual_address) {
 
-    if(block_address > blockCounter){
-        int k = 0;
-        for(int i = block_address; i < block_address + 10; i++) {
-          for(int j = 0; j < 4; j++) {
-            if(buffer[k] == '\n'||buffer[k] == '\0'){
-                memory[i][j] = ' ';
-                k++;
-                continue;
-            }
-            memory[i][j] = buffer[k];
-            k++;
-        }
-    }
-   }
-   else{
+    int blockAddress = randomAddressGenerator();
+    int ptrAddress = PTR*10 + virtual_address/10;
+    char address[4];
+    itoa(blockAddress,address,10);
+    memory[ptrAddress][2] = address[0];
+    if(address[1]!='\0')
+    memory[ptrAddress][3] = address[1];
+
     int k = 0;
-    for(int i = blockCounter * 10; i < (blockCounter * 10) + 10; i++) {
+    for(int i = blockAddress * 10; i < (blockAddress * 10) + 10; i++) {
         for(int j = 0; j < 4; j++) {
             if(buffer[k] == '\n'||buffer[k] == '\0'){
                 memory[i][j] = ' ';
@@ -76,41 +73,76 @@ void data_To_Memory(char *buffer,int block_address) {
             k++;
         }
     }
-         blockCounter++;
-   }
-    
-    
-}
 
+    blockCounter++;
+}
+    
 // Function to load the contents main memory to buffer
 void memory_to_buffer(char *buffer, int block) {
     int k = 0;
+    block = block - block%10;
     for(int i = block; i < block + 10; i++) {
         for(int j = 0; j < 4; j++) {
             buffer[k] = memory[i][j];
             k++;
         }
     }
-    blockCounter++;
+}
+
+
+// Function to extract memory address from instruction
+int String_to_address(char* instruction){
+
+    char s[3];
+    s[0] = instruction[2];
+    if(instruction[3]!='#'){
+        s[1] = instruction[3];
+        s[2] = '\0';
+    }
+    else{
+        s[1] = '\0';
+    }
+    return atoi(s);
+}
+
+bool checkPTREntry(int virtualAddress){
+    int PTR_Entry = PTR*10 + virtualAddress/10;
+    for(int i = 0; i < 4; i++){
+        if(memory[PTR_Entry][i]!='#'){
+            return true;
+            break;
+        }
+    }
+
+    return false;
+}
+
+int calRealAddress(int virtualAddress){
+    int PTR_Entry = PTR*10 + virtualAddress/10;
+    if(checkPTREntry(virtualAddress)){
+        int RealAdress = String_to_address(memory[PTR_Entry]);
+        return RealAdress*10;
+    }
+    else 
+    return -1;
 }
 
 // Function to store data from memory to general purpose register
-char* get_data(int block_address){
+char* get_data(int realAddress){
 
     char* data = (char*)malloc(4);
     for(int i = 0; i < 4 ; i++){
-        data[i] = memory[block_address][i];
+        data[i] = memory[realAddress][i];
     }
-
     return data;
-    free(data);
 }
 
 // Function to store data from general purpose register to memory
-void store_data(int block_address, char* general_register){
+void store_data(int virtual_address, char* general_register){
 
+    int realAddress = calRealAddress(virtual_address) + virtual_address%10;
     for(int i = 0; i < 4 ; i++){
-        memory[block_address][i] = general_register[i];
+        memory[realAddress][i] = general_register[i];
     }
 
 }
@@ -157,5 +189,3 @@ int create_PageTable(){
 
     return ptr;
 }
-
-
