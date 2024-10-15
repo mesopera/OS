@@ -24,8 +24,11 @@ int Halt(){
 int Read(char* instruction){
 
     int address = String_to_address(instruction);
-   
     if(isValidAddress(address)){                        // Checks for valid address
+        
+        if(address/10<blockCounter)
+        PI = 2;
+        else
         return Data_To_Buffer(address);
     }
     else{

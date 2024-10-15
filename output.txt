@@ -3,8 +3,8 @@ Hello Everyone!
 Program executed successfully with exit code :0
 
 
-Out of data
-Program terminated with exit code :1
+Operand Error
+Program terminated with exit code :5
 
 
                     *                   

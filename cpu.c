@@ -12,10 +12,10 @@ void cpu_init(){
    TI = 0;
    PI = 0;
    H = 0;
-   program_counter = 0;
    TTC = 0;
    LLC = 0;
    toggle = false;
+   program_counter = 0;
    memset(instruction_register,'-',4);
    memset(general_register,'-',4);
 
@@ -86,9 +86,7 @@ void decode_instruction(){
         TTC+=2;
         if(TTC>PCB[1]){
             TI = 2;
-            MOS(instruction_register);
         }
-        else
         MOS(instruction_register);
     }
     else if (strncmp(instruction_register,"PD",2)==0){
@@ -97,9 +95,7 @@ void decode_instruction(){
         LLC++;
         if(TTC>PCB[1]){
             TI = 2;
-            MOS(instruction_register);
         }
-        else
         MOS(instruction_register);
     }
     else if (strncmp(instruction_register,"H",1)==0){
@@ -107,9 +103,7 @@ void decode_instruction(){
         TTC++;
         if(TTC>PCB[1]){
             TI = 2;
-            MOS(instruction_register);
         }
-        else
         MOS(instruction_register);
     }
     else if(strncmp(instruction_register,"LR",2)==0){
